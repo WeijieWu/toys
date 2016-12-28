@@ -12,8 +12,7 @@ if test -z $BRANCH; then
 fi
 echo $NEW_PROJECT_DIR
 echo $BRANCH
-mkdir $NEW_PROJECT_DIR
-git archive --remote=https://github.com/WeijieWu/toys.git $BRANCH | tar -xvf - -C $NEW_PROJECT_DIR
+git clone https://github.com/WeijieWu/toys.git -b $BRANCH $NEW_PROJECT_DIR
 cd $NEW_PROJECT_DIR
 cp package.json ~/.workspace/toys/packages
 cd ~/.workspace/toys/packages

@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Toys",
+    "script": "./bin/www",
+    "args": "",
+    "watch": ["bin/www"],
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }
+]

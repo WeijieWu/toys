@@ -16,20 +16,20 @@ module.exports = {
   entry: {
     main: [
       'babel-polyfill',
-      path.join(process.cwd(), 'src/client/main.js')
+      path.join(process.cwd(), 'components/client/main.js'),
     ],
     vendor: [
       'antd/lib/table', 'antd/lib/message', 'antd/lib/modal', 'antd/lib/form', 'antd/lib/input',
       'antd/lib/select', 'antd/lib/date-picker', 'antd/lib/col', 'antd/lib/row', 'antd/lib/button',
       'antd/lib/pagination', 'antd/lib/spin',
-      path.join(process.cwd(), 'src/util/asyncInjectors')
-    ]
+      path.join(process.cwd(), 'components/util/asyncInjectors'),
+    ],
   },
   output: {
     path: path.join(process.cwd(), 'build'),
     publicPath: '/build/',   // 网站运行时访问目录
     filename: '[name].[chunkhash].js',
-    chunkFilename: '[name].[chunkhash].chunk.js'
+    chunkFilename: '[name].[chunkhash].chunk.js',
   },
   module: {
     loaders: [
@@ -38,70 +38,70 @@ module.exports = {
         test: /\.js$/,
         loader: 'eslint-loader',
         query: {
-          configFile: path.join(process.cwd(), '.eslintrc.js')
+          configFile: path.join(process.cwd(), '.eslintrc.js'),
         },
-        exclude: [/node_modules/]
+        exclude: [/node_modules/],
       },
       {
         test: [/\.js$/, /\.jsx$/],
         exclude: /node_modules/,
-        loader: 'babel-loader'
+        loader: 'babel-loader',
       },
 
       {
         test: /\.css$/,
         loaders: ExtractTextPlugin.extract({
           fallbackLoader: "style-loader",
-          loader: "css-loader"
-        })
+          loader: "css-loader",
+        }),
       },
       {
         test: /\.less$/,
         loaders: ExtractTextPlugin.extract({
           fallbackLoader: "style-loader",
-          loader: ['css-loader', 'postcss-loader', `less-loader?{"modifyVars":{${theme}}}`]
-        })
+          loader: ['css-loader', 'postcss-loader', `less-loader?{"modifyVars":{${theme}}}`],
+        }),
       },
       {
         test: /\.(jpg|png|gif)$/,
         loaders: [
           'file-loader',
-          'image-webpack-loader?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}'
-        ]
-      }
-    ]
+          'image-webpack-loader?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}',
+        ],
+      },
+    ],
   },
   resolve: {
-    modules: ['src', 'node_modules'],
-    extensions: ['.js', '.jsx', '.less']
+    modules: ['components', 'node_modules'],
+    extensions: ['.js', '.jsx', '.less'],
   },
 
   plugins: [
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /zh-cn/),
     new webpack.ProvidePlugin({
       moment: 'moment',
-      Immutable: 'immutable'
+      Immutable: 'immutable',
     }),
     new webpack.DefinePlugin({
       'process.env': {
         BASE_PATH_ENTERPRISE: process.env.BASE_PATH_ENTERPRISE ? `"${process.env.BASE_PATH_ENTERPRISE}"` : null,
-        NODE_ENV: JSON.stringify('production')
-      }
+        NODE_ENV: JSON.stringify('production'),
+      },
     }),
     new webpack.optimize.CommonsChunkPlugin({
       name: "vendor",
-      filename: "vendor.bundle.js"
+      filename: "vendor.bundle.js",
     }),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
       filename: 'commons.bundle.js',
       children: true,
       minChunks: 2,
-      async: true
+      async: true,
     }),
     // Minify and optimize the index.html
     new HtmlWebpackPlugin({
-      template: path.join(process.cwd(), 'src/index.html'),
+      template: path.join(process.cwd(), 'components/index.html'),
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -112,23 +112,23 @@ module.exports = {
         keepClosingSlash: true,
         minifyJS: true,
         minifyCSS: true,
-        minifyURLs: true
+        minifyURLs: true,
       },
-      inject: true
+      inject: true,
     }),
     new ExtractTextPlugin({
       filename: 'style.css',
       allChunks: true,
-      disable: false
+      disable: false,
     }),
     new webpack.LoaderOptionsPlugin({
       options: {
         postcss: [
           autoprefixer({
-            browsers: ['last 2 versions']
-          })
-        ]
-      }
-    })
-  ]
+            browsers: ['last 2 versions'],
+          }),
+        ],
+      },
+    }),
+  ],
 };

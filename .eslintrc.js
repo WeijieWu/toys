@@ -41,6 +41,7 @@ module.exports = {
       "void": true,
       "process": true,
       "moment": true,
-      "Immutable": true
+      "Immutable": true,
+      "fetch": true
     }
 };

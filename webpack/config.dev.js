@@ -15,7 +15,7 @@ module.exports = {
   entry: {
     main: [
       'babel-polyfill',
-      'webpack-hot-middleware/client',
+      // 'webpack-hot-middleware/client',
       path.join(process.cwd(), 'components/client/main.js'),
     ],
   },

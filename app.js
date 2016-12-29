@@ -11,6 +11,7 @@ const webpackHot = require('webpack-hot-middleware');
 const compiler = webpack(config);
 const multer = require('multer');
 const BlinkDiff = require('blink-diff');
+const NODE_ENV = process.env.NODE_ENV;
 const BASE_DIR = __dirname;
 const PENDING_IMAGES = `${BASE_DIR}/pendingImages`;
 const UPLOAD_DIR = `${BASE_DIR}/uploads`;
@@ -33,30 +34,56 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(webpackDev(compiler, {
-  noInfo: true,
-  publicPath: config.output.publicPath,
-}));
-app.use(webpackHot(compiler));
-app.get('*', function(req, res) {
-  res.sendFile(path.join(process.cwd(), 'components/index.html'));
-});
+app.use("/build", express.static(path.join(__dirname, '/build')));
+app.use("/uploads", express.static(path.join(__dirname, '/uploads')));
+
+if (NODE_ENV !== "production") {
+  app.use(webpackDev(compiler, {
+    noInfo: true,
+    publicPath: config.output.publicPath,
+  }));
+  app.use(webpackHot(compiler));
+}
+
+if (NODE_ENV === "production") {
+  app.get('*', function(req, res) {
+    res.sendFile(path.join(process.cwd(), 'build'));
+  });
+  app.get('/', function(req, res) {
+    res.sendFile(path.join(process.cwd(), 'components/index.html'));
+  });
+} else {
+  app.get('*', function(req, res) {
+    res.sendFile(path.join(process.cwd(), 'components/index.html'));
+  });
+}
+
 app.post("/upload", upload.single('file'), function(req, res) {
   co(function * () {
-    const {file = {}, file: {mimetype, fileName, originalname}} = req;
-    console.log(file);
+    let {file: {mimetype, fileName}} = req;
     if (mimetype === "application/pdf") {
-      yield pdfToImage(fileName);
+      fileName = yield pdfToImage(fileName);
     }
-  }).then(() => {
-    res.send("ok");
+    return fileName;
+  }).then((fileName) => {
+    res.send({fileName});
   }).catch(e => {
     console.log(e);
     res.send("上传失败");
   });
 });
+
+app.post("/compare", function(req, res) {
+  const {fileList} = req.body;
+  const [fileA, fileB] = fileList;
+  co(function * () {
+    yield diffImage(fileA, fileB, function(fileName) {
+      res.send({fileName});
+    });
+  });
+});
+
 app.use(function(req, res, next) {
   const err = new Error('Not Found');
   err.status = 404;
@@ -69,18 +96,20 @@ app.use(function(err, req, res) {
   res.render('error');
 });
 
-function * diffImage(imageA, imageB) {
+function * diffImage(imageA, imageB, cb) {
+  const resImage = `diff${imageA}`;
   var diff = new BlinkDiff({
-    imageAPath: `${PENDING_IMAGES}/${imageA}`,
-    imageBPath: `${PENDING_IMAGES}/${imageB}`,
+    imageAPath: `${UPLOAD_DIR}/${imageA}`,
+    imageBPath: `${UPLOAD_DIR}/${imageB}`,
     thresholdType: BlinkDiff.THRESHOLD_PERCENT,
     threshold: 0.01,
-    imageOutputPath: PENDING_IMAGES,
+    imageOutputPath: `${UPLOAD_DIR}/diff${imageA}`,
   });
   diff.run(function(error, result) {
     if (error) {
       throw error;
     } else {
+      cb(resImage);
       console.log(diff.hasPassed(result.code) ? 'Passed' : 'Failed');
       console.log('Found ' + result.differences + ' differences.');
     }
@@ -89,10 +118,8 @@ function * diffImage(imageA, imageB) {
 
 function * pdfToImage(fileName) {
   var pdfImage = new PDFImage(`${UPLOAD_DIR}/${fileName}`);
-  pdfImage.convertPage(0).then(function(imagePath) {
-    console.log(imagePath);
-  }, function(e) {
-    console.log(e);
-  });
+  var imagePath = yield pdfImage.convertPage(0);
+  imagePath = imagePath.split("/").pop();
+  return imagePath;
 }
 module.exports = app;

@@ -16,14 +16,14 @@ module.exports = {
     main: [
       'babel-polyfill',
       'webpack-hot-middleware/client',
-      path.join(process.cwd(), 'components/client/main.js')
-    ]
+      path.join(process.cwd(), 'components/client/main.js'),
+    ],
   },
   output: {
     path: path.join(process.cwd(), 'build'),
     publicPath: '/build/',   // 网站运行时访问目录
     filename: '[name].js',
-    chunkFilename: '[id].chunk.js'
+    chunkFilename: '[id].chunk.js',
   },
   module: {
     loaders: [
@@ -32,36 +32,36 @@ module.exports = {
         test: /\.js$/,
         loader: 'eslint-loader',
         query: {
-          configFile: path.join(process.cwd(), '.eslintrc.js')
+          configFile: path.join(process.cwd(), '.eslintrc.js'),
         },
-        exclude: [/node_modules/]
+        exclude: [/node_modules/],
       },
       {
         test: [/\.js$/, /\.jsx$/],
         exclude: /node_modules/,
-        loader: 'babel-loader'
+        loader: 'babel-loader',
       },
 
       {
         test: /\.css$/,
-        loaders: ['style-loader', 'css-loader']
+        loaders: ['style-loader', 'css-loader'],
       },
       {
         test: /\.less$/,
-        loaders: ['style-loader', 'css-loader', 'postcss-loader', `less-loader?{"modifyVars":{${theme}}}`]
+        loaders: ['style-loader', 'css-loader', 'postcss-loader', `less-loader?{"modifyVars":{${theme}}}`],
       },
       {
         test: /\.(jpg|png|gif)$/,
         loaders: [
           'file-loader',
-          'image-webpack-loader?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}'
-        ]
-      }
-    ]
+          'image-webpack-loader?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}',
+        ],
+      },
+    ],
   },
   resolve: {
     modules: ['components', 'node_modules'],
-    extensions: ['.js', '.jsx', '.less']
+    extensions: ['.js', '.jsx', '.less'],
   },
 
   plugins: [
@@ -70,7 +70,7 @@ module.exports = {
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /zh-cn/),
     new webpack.ProvidePlugin({
       moment: 'moment',
-      Immutable: 'immutable'
+      Immutable: 'immutable',
     }),
     // new webpack.optimize.CommonsChunkPlugin({
     //   name: 'vendor',
@@ -85,17 +85,17 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env': {
         BASE_PATH_ENTERPRISE: process.env.BASE_PATH_ENTERPRISE ? `"${process.env.BASE_PATH_ENTERPRISE}"` : null,
-        NODE_ENV: '"development"'
-      }
+        NODE_ENV: '"development"',
+      },
     }),
     new webpack.LoaderOptionsPlugin({
       options: {
         postcss: [
           autoprefixer({
-            browsers: ['last 2 versions']
-          })
-        ]
-      }
-    })
-  ]
+            browsers: ['last 2 versions'],
+          }),
+        ],
+      },
+    }),
+  ],
 };
